@@ -1,37 +1,32 @@
+package otus.courses;
+
 import factory.WebDriverFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
-import pages.EventsPage;
 import pages.MainPage;
-import pages.TestsCoursCardPage;
-import pages.TestsCoursesPages;
 
-public class TestsProject{
+public class TestsCourses {
 
     private WebDriver driver;
 
     @BeforeEach
     public void init(){
         driver = new WebDriverFactory().newDriver();
-        MainPage mainPage = new MainPage(driver);
-        mainPage.open("/");
-        mainPage.mainPageWaitDownload();
-    }
-
-    @AfterEach
-    public void close() {
-        if(this.driver != null) {
-            this.driver.close();
-            this.driver.quit();
-        }
+//        MainPage mainPage = new MainPage(driver);
+//        mainPage.open("/");
+//        mainPage.mainPageWaitDownload();
     }
 
 
     @Test
 //    Необходимо создать проект в Maven'e и реализовать:
-//
+    public void openMainPage() {
+        MainPage mainPage = new MainPage(driver);
+        mainPage.open("/");
+        mainPage.mainPageWaitDownload();
+    }
 //    1. Фабрику (WebDriverFactory), которая будет получать значение из окружения и запускать соответствующий браузер
 //    Браузеры: Chrome, Firefox, Opera
 //    2. Реализовать подсветку элементов перед нажатием, после нажатия вернуть данные в исходное состояние

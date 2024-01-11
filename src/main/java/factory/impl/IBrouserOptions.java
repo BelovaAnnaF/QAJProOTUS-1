@@ -1,7 +1,7 @@
 package factory.impl;
 
-import org.openqa.selenium.MutableCapabilities;
+import org.openqa.selenium.WebDriver;
 
 public interface IBrouserOptions {
-    MutableCapabilities getOptions();
+    WebDriver getOptions();
 }

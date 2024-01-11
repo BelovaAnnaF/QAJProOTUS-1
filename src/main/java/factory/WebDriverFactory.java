@@ -13,35 +13,33 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.opera.OperaDriver;
 import org.openqa.selenium.opera.OperaOptions;
+import org.openqa.selenium.support.events.EventFiringWebDriver;
 
 
-public class WebDriverFactory {
+public class WebDriverFactory implements IFactory<EventFiringWebDriver>{
 
     private final String BROUSER_NAME = System.getProperty("browser", "chrome");
 
-    public WebDriver newDriver(){
-
-        if(BROUSER_NAME == null){
+    @Override
+    public EventFiringWebDriver newDriver() {
+        if (BROUSER_NAME == null) {
             throw new DriverNotSupportedException(BROUSER_NAME);
         }
 
         switch (BROUSER_NAME) {
             case "chrome": {
-                WebDriverManager.chromedriver().setup();
-                IBrouserOptions options = new ChromeDriverOptions();
-                return new ChromeDriver((ChromeOptions) options.getOptions());
+                return new EventFiringWebDriver(new ChromeDriverOptions().getOptions());
             }
             case "firefox": {
-                WebDriverManager.firefoxdriver().setup();
-                IBrouserOptions options = new FirefoxDriverOptions();
-                return new FirefoxDriver((FirefoxOptions) options.getOptions());
+                return new EventFiringWebDriver(new FirefoxDriverOptions().getOptions());
             }
             case "opera": {
                 WebDriverManager.operadriver().setup();
                 IBrouserOptions options = new OperaDriverOptions();
-                return new OperaDriver((OperaOptions) options.getOptions());
+                return new EventFiringWebDriver(new OperaDriverOptions().getOptions());
 
+            }
         }
-    }
         return null;
+    }
 }
