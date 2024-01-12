@@ -1,24 +1,17 @@
 package otus.courses;
 
-import factory.WebDriverFactory;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import annotations.Driver;
+import extensions.UIExtensions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
 import pages.MainPage;
 
+@ExtendWith(UIExtensions.class)
 public class TestsCourses {
 
+    @Driver
     private WebDriver driver;
-
-    @BeforeEach
-    public void init(){
-        driver = new WebDriverFactory().newDriver();
-//        MainPage mainPage = new MainPage(driver);
-//        mainPage.open("/");
-//        mainPage.mainPageWaitDownload();
-    }
-
 
     @Test
 //    Необходимо создать проект в Maven'e и реализовать:

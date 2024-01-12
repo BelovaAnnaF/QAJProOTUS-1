@@ -34,10 +34,7 @@ public class WebDriverFactory implements IFactory<EventFiringWebDriver>{
                 return new EventFiringWebDriver(new FirefoxDriverOptions().getOptions());
             }
             case "opera": {
-                WebDriverManager.operadriver().setup();
-                IBrouserOptions options = new OperaDriverOptions();
                 return new EventFiringWebDriver(new OperaDriverOptions().getOptions());
-
             }
         }
         return null;
