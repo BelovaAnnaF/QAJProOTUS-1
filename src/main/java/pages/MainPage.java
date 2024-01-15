@@ -13,8 +13,6 @@ import java.util.List;
 
 public class MainPage extends AbsBasePage<MainPage> {
 
-  private WebDriverListener dispatcher;
-
   public MainPage(WebDriver driver) {
     super(driver);
   }
@@ -25,7 +23,8 @@ public class MainPage extends AbsBasePage<MainPage> {
   }
   public void buttonClick() {
     WebElement buttonMoreCourses = driver.findElement(By.xpath("//button[contains(text(),'Больше курсов')]"));
-    //dispatcher.beforeClickOn(buttonMoreCourses, driver);
+    WebDriverListener eventListener = new WebDriverListener();
+    eventListener.beforeClickOn(buttonMoreCourses, driver);
     buttonMoreCourses.click();
   }
   public LocalDate getListCoursesDate() {
