@@ -11,41 +11,57 @@ import org.openqa.selenium.support.events.EventFiringWebDriver;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.HashSet;
+import java.util.Set;
 
 public class UIExtensions implements BeforeEachCallback, AfterEachCallback {
 
-    private WebDriver driver = null;
+  private EventFiringWebDriver driver = null;
 
-    private List<Field> getFields(Class<? extends Annotation> annotation, Class clazz) {
-        return Arrays
-                .stream(clazz.getFields())
-                .filter((Field field) -> field.isAnnotationPresent(annotation)
-                        && field.getType().getName().equals(WebDriver.class.getName()))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public void beforeEach(ExtensionContext extensionContext) throws Exception {
-       Class clazz = extensionContext.getTestInstance().getClass();
-       List<Field> annotationFields = getFields(Driver.class, clazz);
-
-        EventFiringWebDriver eventFiringWebDriver = new WebDriverFactory().newDriver();
-        eventFiringWebDriver.register(new WebDriverListener());
-
-        for(Field field: annotationFields) {
-            field.setAccessible(true);
-            field.set(extensionContext.getTestInstance().get(), eventFiringWebDriver);
+  private Set<Field> getAnnotatedFields(Class<? extends Annotation> annotation, ExtensionContext extensionContext) {
+    Set<Field> set = new HashSet<>();
+    Class<?> testClass = extensionContext.getTestClass().get();
+    while (testClass != null) {
+      for (Field field : testClass.getDeclaredFields()) {
+        if (field.isAnnotationPresent(annotation)) {
+          set.add(field);
         }
+      }
+      testClass = testClass.getSuperclass();
     }
+    return set;
+  }
 
-    @Override
-    public void afterEach(ExtensionContext extensionContext) throws Exception {
-        if(this.driver != null) {
-            this.driver.close();
-            this.driver.quit();
-        }
+  @Override
+  public void beforeEach(ExtensionContext extensionContext) {
+    driver = new WebDriverFactory().newDriver();
+    driver.register(new WebDriverListener());
+    Set<Field> fields = getAnnotatedFields(Driver.class, extensionContext);
+
+    for (Field field : fields) {
+      if (field.getType().getName().equals(WebDriver.class.getName())) {
+        AccessController.doPrivileged((PrivilegedAction<Void>)
+            () -> {
+            try {
+              field.setAccessible(true);
+              field.set(extensionContext.getTestInstance().get(), driver);
+              } catch (IllegalAccessException e) {
+              throw new Error(String.format("Could not access or set webdriver in field: %s - is this field public?", field), e);
+            }
+            return null;
+          }
+        );
+      }
     }
+  }
+
+  @Override
+  public void afterEach(ExtensionContext extensionContext) throws Exception {
+    if (this.driver != null) {
+      this.driver.close();
+      this.driver.quit();
+    }
+  }
 }
