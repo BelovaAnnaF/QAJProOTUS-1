@@ -19,6 +19,6 @@ public class TestsCourses {
     mainPage.open("/").mainPageWaitDownload("Популярные курсы");
     mainPage.mainPageMinCoursesDate();
     mainPage.mainPageMaxCoursesDate();
-    mainPage.mainPageCourseFindAndClicK("Java-разработчик");
+    mainPage.mainPageCourseFindAndClicK("DevRel");
   }
 }

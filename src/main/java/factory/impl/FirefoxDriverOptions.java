@@ -11,7 +11,9 @@ public class FirefoxDriverOptions implements IBrouserOptions {
   @Override
   public WebDriver getOptions() {
     FirefoxOptions firefoxOptions = new FirefoxOptions();
+    firefoxOptions.addArguments("-kiosk");
     firefoxOptions.addArguments("-private-window");
+    firefoxOptions.addArguments("--homepage=about:blank");
 
     WebDriverManager.firefoxdriver().browserVersion(brouserVersion).setup();
     return new FirefoxDriver(firefoxOptions);

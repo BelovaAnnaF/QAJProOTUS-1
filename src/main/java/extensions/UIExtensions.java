@@ -60,7 +60,6 @@ public class UIExtensions implements BeforeEachCallback, AfterEachCallback {
   @Override
   public void afterEach(ExtensionContext extensionContext) throws Exception {
     if (this.driver != null) {
-      this.driver.close();
       this.driver.quit();
     }
   }
