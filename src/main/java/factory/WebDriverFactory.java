@@ -6,7 +6,8 @@ import factory.impl.FirefoxDriverOptions;
 import factory.impl.OperaDriverOptions;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 
-
+//    1. Фабрику (WebDriverFactory), которая будет получать значение из окружения и запускать соответствующий браузер
+//    Браузеры: Chrome, Firefox, Opera
 public class WebDriverFactory implements IFactory<EventFiringWebDriver> {
 
   private String brouserName = System.getProperty("browser", "chrome");
