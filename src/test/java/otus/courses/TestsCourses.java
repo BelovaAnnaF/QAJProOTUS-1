@@ -19,6 +19,8 @@ public class TestsCourses {
     mainPage.open("/").mainPageWaitDownload("Популярные курсы");
     mainPage.mainPageMinCoursesDate();
     mainPage.mainPageMaxCoursesDate();
+    mainPage.mainPageMinCoursesDateReduce();
+    mainPage.mainPageMaxCoursesDateReduce();
     mainPage.mainPageCourseFindAndClicK("DevRel");
   }
 }

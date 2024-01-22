@@ -12,7 +12,7 @@ public abstract class AbsBasePage<T> extends AbsPageObject {
 
   private String baseUrl = System.getProperty("base.url", "https://otus.ru");
   private String path = "";
-  WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+  protected WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 
 
   public AbsBasePage(WebDriver driver) {

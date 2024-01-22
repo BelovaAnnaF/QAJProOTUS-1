@@ -1,10 +1,10 @@
 package pages;
 
+import org.apache.commons.io.function.IOStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import listeners.WebDriverListener;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -13,10 +13,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -29,7 +26,7 @@ public class MainPage extends AbsBasePage<MainPage> {
   private String coursePageCheck = "//h1[contains(text(), '%s')]";
   @FindBy(xpath = "//a[contains(@href, 'https://otus.ru/lessons/')]//span[contains(., 'С')]")
   List<WebElement> dateItem;
-  WebDriverListener eventListener = new WebDriverListener();
+  private WebDriverListener eventListener = new WebDriverListener();
   private Logger log = LogManager.getLogger();
 
 
@@ -64,7 +61,6 @@ public class MainPage extends AbsBasePage<MainPage> {
   //получаем список курсов на главной странице и собираем даты их начала
   public List<LocalDate> mainPageGetCoursesDateList() {
     List<LocalDate> dateList = new ArrayList<>();
-
     List<List<String>> datesStringList =
             dateItem.stream().map(WebElement::getText)
                     .map(word -> word.split(" "))
@@ -100,6 +96,16 @@ public class MainPage extends AbsBasePage<MainPage> {
   public MainPage mainPageMaxCoursesDate() {
     String maxCourseDate = String.valueOf(mainPageGetCoursesDateList().stream().max(Comparator.naturalOrder()).get());
     log.info(String.format("Самый поздний курс стартует %s", maxCourseDate));
+    return this;
+  }
+  public MainPage mainPageMinCoursesDateReduce(){
+    String firstDate = String.valueOf(mainPageGetCoursesDateList().stream().reduce((first, current) -> current.isBefore(first) ? current : first).get());
+    log.info(String.format("Самый ранний курс стартует %s", firstDate));
+    return this;
+  }
+  public MainPage mainPageMaxCoursesDateReduce(){
+    String lastDate = String.valueOf(mainPageGetCoursesDateList().stream().reduce((last, current) -> current.isAfter(last) ? current : last).get());
+    log.info(String.format("Самый поздний курс стартует %s", lastDate));
     return this;
   }
 }
