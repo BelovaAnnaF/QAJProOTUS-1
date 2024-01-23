@@ -137,6 +137,9 @@ public class MainPage extends AbsBasePage<MainPage> {
     }
   }
 }
+
+
+
 //public List<LocalDate> mainPageGetCoursesDateList() {
 //  List<LocalDate> dateList = new ArrayList<>();
 //  List<List<String>> datesStringList =
