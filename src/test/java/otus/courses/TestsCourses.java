@@ -12,15 +12,28 @@ public class TestsCourses {
 
   @Driver
   private WebDriver driver;
-
+  //проверяем фильтр по имени курса, найти курс, подсветить и кликнуть, после открытия в карточке курса проверяем, что имя соответствует заданому фильтру
   @Test
   public void openMainPage() {
     MainPage mainPage = new MainPage(driver);
     mainPage.open("/").mainPageWaitDownload("Популярные курсы");
-    mainPage.mainPageMinCoursesDate();
-    mainPage.mainPageMaxCoursesDate();
-    mainPage.mainPageMinCoursesDateReduce();
-    mainPage.mainPageMaxCoursesDateReduce();
+    //mainPage.mainPageMinCoursesDate();
+    //mainPage.mainPageMaxCoursesDate();
     mainPage.mainPageCourseFindAndClicK("DevRel");
+  }
+
+  //находим и открываем карточку курса с самой ранней/поздней датой
+  @Test
+  public void openMinDateCourseMainPage() {
+    MainPage mainPage = new MainPage(driver);
+    mainPage.open("/").mainPageWaitDownload("Популярные курсы");
+    mainPage.mainPageGetMinMaxCoursesDate(true);
+  }
+
+  @Test
+  public void openMaxDateCourseMainPage() {
+    MainPage mainPage = new MainPage(driver);
+    mainPage.open("/").mainPageWaitDownload("Популярные курсы");
+    mainPage.mainPageGetMinMaxCoursesDate(false);
   }
 }

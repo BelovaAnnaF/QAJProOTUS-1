@@ -1,10 +1,10 @@
 package pages;
 
-import org.apache.commons.io.function.IOStream;
+import listeners.WebDriverListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import listeners.WebDriverListener;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -17,7 +17,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-
 public class MainPage extends AbsBasePage<MainPage> {
 
   private String courseNameLocator = "//div[h5[contains(text(), '%s')]]";
@@ -25,10 +24,9 @@ public class MainPage extends AbsBasePage<MainPage> {
   private String findNameBlockLocator = "//h2[contains(text(), '%s')]";
   private String coursePageCheck = "//h1[contains(text(), '%s')]";
   @FindBy(xpath = "//a[contains(@href, 'https://otus.ru/lessons/')]//span[contains(., 'С')]")
-  List<WebElement> dateItem;
+  private List<WebElement> dateItem;
   private WebDriverListener eventListener = new WebDriverListener();
   private Logger log = LogManager.getLogger();
-
 
   public MainPage(WebDriver driver) {
     super(driver);
@@ -59,53 +57,122 @@ public class MainPage extends AbsBasePage<MainPage> {
   }
 
   //получаем список курсов на главной странице и собираем даты их начала
-  public List<LocalDate> mainPageGetCoursesDateList() {
-    List<LocalDate> dateList = new ArrayList<>();
-    List<List<String>> datesStringList =
-            dateItem.stream().map(WebElement::getText)
-                    .map(word -> word.split(" "))
-                    .map(array -> Arrays.stream(array).skip(1)
-                            .limit(2).collect(Collectors.toList())).collect(Collectors.toList());
+  public void mainPageGetMinMaxCoursesDate(boolean isMin) {
+    Map<WebElement, LocalDate> coursesStartMap = new HashMap<>();
 
-    for (List<String> dateStringList : datesStringList) {
-      if (dateStringList.size() < 3) {
-        if(dateStringList.get(1).equals("декабря")){
-          dateStringList.add(2, String.valueOf(LocalDate.now().getYear()-1));
-        }else {
-          dateStringList.add(2, String.valueOf(LocalDate.now().getYear()));
+    if(isMin){
+      dateItem.stream().map((WebElement element) -> {
+        List<String> dateStringList  = Arrays.stream(element.getText().split(" ")).skip(1)
+                .limit(2).collect(Collectors.toList());
+        if (dateStringList.size() < 3) {
+          if (dateStringList.get(1).equals("декабря")) {
+            dateStringList.add(2, String.valueOf(LocalDate.now().getYear() - 1));
+          } else {
+            dateStringList.add(2, String.valueOf(LocalDate.now().getYear()));
+          }
         }
-      }
 
-      String dateInString = dateStringList.get(0) + " " + dateStringList.get(1) + " " + dateStringList.get(2);
+        String dateInString = dateStringList.get(0) + " " + dateStringList.get(1) + " " + dateStringList.get(2);
 
-      if (Pattern.compile("\\d+ [а-я]+ \\d{4}").matcher(dateInString).find()) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM yyyy");
-        dateList.add(LocalDate.parse(dateInString, formatter));
+        if (Pattern.compile("\\d+ [а-я]+ \\d{4}").matcher(dateInString).find()) {
+          DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM yyyy");
+          coursesStartMap.put(element, LocalDate.parse(dateInString, formatter));
+        }
+
+        return coursesStartMap;
       }
+      ).collect(Collectors.toList());
+
+      Optional<Map.Entry<WebElement, LocalDate>> listMinDateWebElement = coursesStartMap.entrySet().stream()
+              .reduce((p1, p2) ->
+              {
+                LocalDate date1 = p1.getValue();
+                LocalDate date2 = p2.getValue();
+                return date2.isAfter(date1) || date2.isEqual(date1) ? p1 : p2;
+              });
+      WebElement cartCoursesElement = listMinDateWebElement
+              .get()
+              .getKey()
+              .findElement(By.xpath(".//ancestor::a"));
+      JavascriptExecutor js = (JavascriptExecutor)driver;
+      js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+      cartCoursesElement.click();
+
+    }else {
+      dateItem.stream().map((WebElement element) -> {
+        List<String> dateStringList  = Arrays.stream(element.getText().split(" ")).skip(1)
+                        .limit(2).collect(Collectors.toList());
+        if (dateStringList.size() < 3) {
+          if (dateStringList.get(1).equals("декабря")) {
+            dateStringList.add(2, String.valueOf(LocalDate.now().getYear() - 1));
+          } else {
+            dateStringList.add(2, String.valueOf(LocalDate.now().getYear()));
+          }
+        }
+        String dateInString = dateStringList.get(0) + " " + dateStringList.get(1) + " " + dateStringList.get(2);
+
+        if (Pattern.compile("\\d+ [а-я]+ \\d{4}").matcher(dateInString).find()) {
+          DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM yyyy");
+          coursesStartMap.put(element, LocalDate.parse(dateInString, formatter));
+        }
+
+        return coursesStartMap;
+      }
+      ).collect(Collectors.toList());
+
+      Optional<Map.Entry<WebElement, LocalDate>> listMinDateWebElement = coursesStartMap.entrySet().stream()
+              .reduce((p1, p2) ->
+              {
+                LocalDate date1 = p1.getValue();
+                LocalDate date2 = p2.getValue();
+                return date2.isBefore(date1) || date2.isEqual(date1) ? p1 : p2;
+              });
+      WebElement cartCoursesElement = listMinDateWebElement
+              .get()
+              .getKey()
+              .findElement(By.xpath(".//ancestor::a"));
+      JavascriptExecutor js = (JavascriptExecutor)driver;
+      js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+      cartCoursesElement.click();
     }
-    return dateList;
-  }
-  //ищем min дату начала курса
-  public MainPage mainPageMinCoursesDate() {
-    String minCourseDate = String.valueOf(mainPageGetCoursesDateList().stream().min(Comparator.naturalOrder()).get());
-    log.info(String.format("Самый ранний курс стартует %s", minCourseDate));
-    return this;
-  }
-
-  //ищем max дату начала курса
-  public MainPage mainPageMaxCoursesDate() {
-    String maxCourseDate = String.valueOf(mainPageGetCoursesDateList().stream().max(Comparator.naturalOrder()).get());
-    log.info(String.format("Самый поздний курс стартует %s", maxCourseDate));
-    return this;
-  }
-  public MainPage mainPageMinCoursesDateReduce(){
-    String firstDate = String.valueOf(mainPageGetCoursesDateList().stream().reduce((first, current) -> current.isBefore(first) ? current : first).get());
-    log.info(String.format("Самый ранний курс стартует %s", firstDate));
-    return this;
-  }
-  public MainPage mainPageMaxCoursesDateReduce(){
-    String lastDate = String.valueOf(mainPageGetCoursesDateList().stream().reduce((last, current) -> current.isAfter(last) ? current : last).get());
-    log.info(String.format("Самый поздний курс стартует %s", lastDate));
-    return this;
   }
 }
+//public List<LocalDate> mainPageGetCoursesDateList() {
+//  List<LocalDate> dateList = new ArrayList<>();
+//  List<List<String>> datesStringList =
+//          dateItem.stream().map(WebElement::getText)
+//                  .map(word -> word.split(" "))
+//                  .map(array -> Arrays.stream(array).skip(1)
+//                          .limit(2).collect(Collectors.toList())).collect(Collectors.toList());
+
+//  for (List<String> dateStringList : datesStringList) {
+//    if (dateStringList.size() < 3) {
+//      if(dateStringList.get(1).equals("декабря")){
+//        dateStringList.add(2, String.valueOf(LocalDate.now().getYear()-1));
+//      }else {
+//        dateStringList.add(2, String.valueOf(LocalDate.now().getYear()));
+//      }
+//    }
+
+//    String dateInString = dateStringList.get(0) + " " + dateStringList.get(1) + " " + dateStringList.get(2);
+
+//    if (Pattern.compile("\\d+ [а-я]+ \\d{4}").matcher(dateInString).find()) {
+//      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM yyyy");
+//      dateList.add(LocalDate.parse(dateInString, formatter));
+//    }
+//  }
+//  return dateList;
+//}
+//ищем min дату начала курса
+//public MainPage mainPageMinCoursesDate() {
+//  String minCourseDate = String.valueOf(mainPageGetCoursesDateList().stream().min(Comparator.naturalOrder()).get());
+//  log.info(String.format("Самый ранний курс стартует %s", minCourseDate));
+//  return this;
+//}
+
+//ищем max дату начала курса
+//public MainPage mainPageMaxCoursesDate() {
+//  String maxCourseDate = String.valueOf(mainPageGetCoursesDateList().stream().max(Comparator.naturalOrder()).get());
+//  log.info(String.format("Самый поздний курс стартует %s", maxCourseDate));
+//  return this;
+//}
