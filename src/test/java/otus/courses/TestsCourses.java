@@ -17,8 +17,6 @@ public class TestsCourses {
   public void openMainPage() {
     MainPage mainPage = new MainPage(driver);
     mainPage.open("/").mainPageWaitDownload("Популярные курсы");
-    //mainPage.mainPageMinCoursesDate();
-    //mainPage.mainPageMaxCoursesDate();
     mainPage.mainPageCourseFindAndClicK("DevRel");
   }
 
