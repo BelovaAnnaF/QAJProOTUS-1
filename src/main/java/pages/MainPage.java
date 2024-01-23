@@ -3,6 +3,7 @@ package pages;
 import listeners.WebDriverListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -96,7 +97,20 @@ public class MainPage extends AbsBasePage<MainPage> {
               .findElement(By.xpath(".//ancestor::a"));
       JavascriptExecutor js = (JavascriptExecutor)driver;
       js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+
+      String titleCourses = cartCoursesElement
+              .findElement(By.cssSelector("h5"))
+              .getText();
+
       cartCoursesElement.click();
+
+      wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(String.format(coursePageCheck, titleCourses))));
+
+      String titlePageCourses = driver
+              .findElement(By.cssSelector("h1"))
+              .getText();
+
+      Assertions.assertTrue(titlePageCourses.contains(titleCourses));
 
     }else {
       dateItem.stream().map((WebElement element) -> {
@@ -133,7 +147,20 @@ public class MainPage extends AbsBasePage<MainPage> {
               .findElement(By.xpath(".//ancestor::a"));
       JavascriptExecutor js = (JavascriptExecutor)driver;
       js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+
+      String titleCourses = cartCoursesElement
+              .findElement(By.cssSelector("h5"))
+              .getText();
+
       cartCoursesElement.click();
+
+      wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(String.format(coursePageCheck, titleCourses))));
+
+      String titlePageCourses = driver
+              .findElement(By.cssSelector("h1"))
+              .getText();
+
+      Assertions.assertTrue(titlePageCourses.contains(titleCourses));
     }
   }
 }

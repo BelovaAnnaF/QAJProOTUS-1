@@ -20,7 +20,7 @@ public class TestsCourses {
     mainPage.mainPageCourseFindAndClicK("DevRel");
   }
 
-  //находим и открываем карточку курса с самой ранней/поздней датой
+  //находим и открываем карточку курса с самой ранней/поздней датой и открылся нужный курс
   @Test
   public void openMinDateCourseMainPage() {
     MainPage mainPage = new MainPage(driver);
